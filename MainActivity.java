@@ -1,17 +1,58 @@
 package com.example.majisha.ebayshopping;
 
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class MainActivity extends ActionBarActivity {
     private EditText input_keyword;
     private EditText input_pricefrom;
     private EditText input_priceto;
+    private TextView t_result;
+
+
+
+    /**
+     * Background Async Task to get all results by making HTTP Request
+     * */
+    class getSearchResult extends AsyncTask<String, String, JSONObject> {
+
+
+        /**
+         * getting All products from url
+         * */
+        @Override
+        protected JSONObject doInBackground(String... args) {
+            JSonParser jParser = new JSonParser();
+            // Getting JSON from URL
+            String url = "http://searchebay-env.elasticbeanstalk.com/my_index.php?keywords=" + input_keyword.getText().toString();
+            JSONObject json = jParser.getJSONResults(url);
+            return json;
+        }
+
+        protected void onPostExecute(JSONObject json) {
+            try {
+                String result = json.getString("ack");
+                t_result = (TextView) findViewById(R.id.t_result);
+                t_result.setText(result);
+
+            }
+            catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,12 +62,33 @@ public class MainActivity extends ActionBarActivity {
         input_pricefrom = (EditText) findViewById(R.id.i_fromprice);
         input_priceto = (EditText) findViewById(R.id.i_toprice);
 
+        //add onclick for clear button
+        findViewById(R.id.button_clear).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+                input_keyword.setText("");
+                input_pricefrom.setText("");
+                input_priceto.setText("");
+                t_result.setText("");
+                input_keyword.setError(null);
+                input_pricefrom.setError(null);
+                input_priceto.setError(null);
+
+            }
+        });
+
+
+        //add onclick for search button
         findViewById(R.id.button_search).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 boolean v_result = validate_input(v);
+                //validation was successful, no errors -> send request to php server with parameters
+                if (v_result ==  true){
+                    new getSearchResult().execute();
+                }
 
             }
         });
@@ -42,11 +104,12 @@ public class MainActivity extends ActionBarActivity {
             return false;
         }
 
+        if(!input_pricefrom.getText().toString().isEmpty() && !input_priceto.getText().toString().isEmpty() ) {
+            if (Float.parseFloat(input_pricefrom.getText().toString()) > Float.parseFloat(input_priceto.getText().toString())) {
 
-        if (Float.parseFloat(input_pricefrom.getText().toString()) > Float.parseFloat(input_pricefrom.getText().toString())){
-
-            input_pricefrom.setError("Price From should be less than or equal to Price To");
-            return false;
+                input_pricefrom.setError("Price From should be less than or equal to Price To");
+                return false;
+            }
         }
 
         return true;
