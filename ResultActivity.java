@@ -5,12 +5,15 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class ResultActivity extends ListActivity {
+public class ResultActivity extends ActionBarActivity {
 
     // Creating JSON Parser object
 
@@ -20,7 +23,14 @@ public class ResultActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_result);
+
+        try {
+            JSONObject json = new JSONObject(getIntent().getStringExtra("JSON_OBJECT"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 

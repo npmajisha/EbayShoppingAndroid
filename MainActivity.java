@@ -1,5 +1,6 @@
 package com.example.majisha.ebayshopping;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -36,15 +37,24 @@ public class MainActivity extends ActionBarActivity {
             JSonParser jParser = new JSonParser();
             // Getting JSON from URL
             String url = "http://searchebay-env.elasticbeanstalk.com/my_index.php?keywords=" + input_keyword.getText().toString();
-            JSONObject json = jParser.getJSONResults(url);
-            return json;
+
+            return jParser.getJSONResults(url);
         }
 
         protected void onPostExecute(JSONObject json) {
             try {
                 String result = json.getString("ack");
-                t_result = (TextView) findViewById(R.id.t_result);
-                t_result.setText(result);
+
+                if(result.equals("Success")){
+
+                    Intent intent = new Intent(MainActivity.this, ResultActivity.class);
+                    intent.putExtra("JSON_OBJECT", json.toString());
+                    startActivity(intent);
+                }
+                else {
+                    t_result = (TextView) findViewById(R.id.t_result);
+                    t_result.setText(result);
+                }
 
             }
             catch (JSONException e){
@@ -86,7 +96,7 @@ public class MainActivity extends ActionBarActivity {
 
                 boolean v_result = validate_input(v);
                 //validation was successful, no errors -> send request to php server with parameters
-                if (v_result ==  true){
+                if (v_result){
                     new getSearchResult().execute();
                 }
 
