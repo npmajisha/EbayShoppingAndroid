@@ -10,9 +10,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import android.util.Log;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 
 import java.io.InputStream;
 
@@ -48,7 +45,9 @@ public class JSonParser {
 
 
         try {
-            json = convertStreamToString(is);
+            if(is != null) {
+                json = convertStreamToString(is);
+            }
 
         } catch (Exception e) {
             Log.e("Buffer Error", "Error converting result " + e.toString());

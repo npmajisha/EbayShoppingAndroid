@@ -8,11 +8,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -20,6 +24,7 @@ public class MainActivity extends ActionBarActivity {
     private EditText input_pricefrom;
     private EditText input_priceto;
     private TextView t_result;
+    private Spinner s_sortby;
 
 
 
@@ -36,7 +41,42 @@ public class MainActivity extends ActionBarActivity {
         protected JSONObject doInBackground(String... args) {
             JSonParser jParser = new JSonParser();
             // Getting JSON from URL
-            String url = "http://searchebay-env.elasticbeanstalk.com/my_index.php?keywords=" + input_keyword.getText().toString();
+            String url = null;
+            String sort_order = "";
+            try {
+
+                String keyword = URLEncoder.encode(input_keyword.getText().toString(), "UTF-8");
+                String pagination = "&results_per_page=5";
+                String selectedSortby = s_sortby.getSelectedItem().toString();
+
+                if(selectedSortby.equals("Best Match")){
+                    sort_order =  "&sort_by=BestMatch";
+                }
+                else if(selectedSortby.equals("Price:highest first")){
+                    sort_order = "&sort_by=CurrentPriceHighest";
+                }
+                else if(selectedSortby.equals("Price+Shipping:highest first")){
+                    sort_order = "&sort_by=PricePlusShippingHighest";
+                }
+                else if(selectedSortby.equals("Price+Shipping:lowest first")){
+                    sort_order = "&sort_by=PricePlusShippingLowest";
+                }
+
+                String pricefrom = input_pricefrom.getText().toString();
+                String priceto = input_priceto.getText().toString();
+                String item_filter = "";
+                if(!pricefrom.isEmpty()){
+                    item_filter = "&low_price_range="+pricefrom;
+                }
+
+                if(!priceto.isEmpty()){
+                    item_filter +="&high_price_range="+priceto;
+                }
+
+                url = "http://searchebay-env.elasticbeanstalk.com/my_index.php?keywords=" + keyword + pagination + sort_order + item_filter;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
 
             return jParser.getJSONResults(url);
         }
@@ -71,6 +111,8 @@ public class MainActivity extends ActionBarActivity {
         input_keyword = (EditText) findViewById(R.id.i_keyword);
         input_pricefrom = (EditText) findViewById(R.id.i_fromprice);
         input_priceto = (EditText) findViewById(R.id.i_toprice);
+        t_result = (TextView) findViewById(R.id.t_result);
+        s_sortby = (Spinner) findViewById(R.id.dropdown_sortby);
 
         //add onclick for clear button
         findViewById(R.id.button_clear).setOnClickListener(new View.OnClickListener() {
@@ -84,6 +126,7 @@ public class MainActivity extends ActionBarActivity {
                 input_keyword.setError(null);
                 input_pricefrom.setError(null);
                 input_priceto.setError(null);
+                s_sortby.setSelection(0);
 
             }
         });
