@@ -11,6 +11,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.facebook.FacebookSdk;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,6 +91,7 @@ public class MainActivity extends ActionBarActivity {
 
                     Intent intent = new Intent(MainActivity.this, ResultActivity.class);
                     intent.putExtra("JSON_OBJECT", json.toString());
+                    intent.putExtra("SEARCH_KEYWORD",input_keyword.getText().toString());
                     startActivity(intent);
                 }
                 else {
@@ -106,6 +109,8 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.activity_main);
 
         input_keyword = (EditText) findViewById(R.id.i_keyword);
